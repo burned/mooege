@@ -20,15 +20,12 @@ using System.Text;
 
 namespace Mooege.Net.GS.Message.Definitions.Misc
 {
-    /// <summary>
-    /// Sent by the client, when the player uses cauldron of jordan on an item
-    /// </summary>
-    [Message(Opcodes.RequestUseCauldronOfJordanMessage)]
-    public class RequestUseCauldronOfJordanMessage : GameMessage
+    [Message(Opcodes.ShrineActivatedMessage)]
+    public class ShrineActivatedMessage : GameMessage
     {
-        public uint ActorID; // Id of the target
+        public uint ActorID; // Actor's DynamicID
 
-        public RequestUseCauldronOfJordanMessage() : base(Opcodes.RequestUseCauldronOfJordanMessage) { }
+        public ShrineActivatedMessage() : base(Opcodes.ShrineActivatedMessage) { }
 
         public override void Parse(GameBitBuffer buffer)
         {
@@ -43,7 +40,7 @@ namespace Mooege.Net.GS.Message.Definitions.Misc
         public override void AsText(StringBuilder b, int pad)
         {
             b.Append(' ', pad);
-            b.AppendLine("RequestUseCauldronOfJordanMessage:");
+            b.AppendLine("ActivateShrineMessage:");
             b.Append(' ', pad++);
             b.AppendLine("{");
             b.Append(' ', pad); b.AppendLine("ActorID: 0x" + ActorID.ToString("X8") + " (" + ActorID + ")");
