@@ -68,9 +68,11 @@ namespace Mooege.Core.GS.Actors.Movement
                 //this.Owner.Position = MovementHelpers.GetMovementPosition(this.Owner.Position, this.Owner.WalkSpeed, facingAngle, 6);
                 if (_path.Count >= 1)
                 {
-                    this.Owner.Move(this._path.First(), MovementHelpers.GetFacingAngle(this.Owner, this._path.First()));
-                    this.Owner.Position = _path.First();
-                    _path.RemoveAt(0);
+                    var tempVector = _path.First();
+                    this.Owner.Move(this._path.First(), MovementHelpers.GetFacingAngle(this.Owner, tempVector));
+                    this.Owner.Position = tempVector;
+                    _path.Remove(tempVector);
+                    this.Owner.World.Game.Pathfinder.VectorPool.PutObject(tempVector);
                     //Logger.Trace("Step left in Queue: " + Path.Count);
                 }
                 else

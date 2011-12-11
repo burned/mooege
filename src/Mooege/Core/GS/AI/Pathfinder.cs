@@ -10,6 +10,7 @@ using Mooege.Core.GS.Common.Types.Misc;
 using Algorithms;
 using Mooege.Core.GS.Actors;
 using Mooege.Common.Logging;
+using System.Collections.Concurrent;
 
 namespace Mooege.Core.GS.AI
 {
@@ -18,13 +19,14 @@ namespace Mooege.Core.GS.AI
         private static readonly Logger Logger = LogManager.CreateLogger();
         private System.Collections.Concurrent.ConcurrentDictionary<uint, List<Vector3D>> _completedPathTasks = new System.Collections.Concurrent.ConcurrentDictionary<uint, List<Vector3D>>();
         private System.Collections.Concurrent.ConcurrentDictionary<uint, PathRequestTask> _queuedPathTasks = new System.Collections.Concurrent.ConcurrentDictionary<uint, PathRequestTask>();
-
+        private ObjectPool<Vector3D> _vectorPool;
+        private Func<Vector3D> myfunc = delegate() {return new Vector3D();};
+        public ObjectPool<Vector3D> VectorPool { get{ if(_vectorPool == null) {_vectorPool = new ObjectPool<Vector3D>(myfunc);} return _vectorPool;}}
         private Pathfinder aipather;
         private Games.Game game;
 
         public Pather(Games.Game game)
         {
-
             this.game = game;
         }
 
@@ -54,8 +56,39 @@ namespace Mooege.Core.GS.AI
                 }
                 else { System.Threading.Thread.Sleep(50); }
             }
-
         }
+        public class ObjectPool<T>
+{
+    private ConcurrentBag<T> _objects;
+    private Func<T> _objectGenerator;
+
+    public ObjectPool(Func<T> objectGenerator)
+    {
+        if (objectGenerator == null)
+            throw new ArgumentNullException("objectGenerator");
+        _objects = new ConcurrentBag<T>();
+        _objectGenerator = objectGenerator;
+    }
+
+    public T GetObject()
+    {
+        T item;
+        if (_objects.TryTake(out item))
+        {
+            Logger.Debug("Returning existing vector " + _objects.Count + " remaining");
+            return item;
+        }
+        Logger.Debug("Creating new Vector");
+        return _objectGenerator();
+    }
+
+    public void PutObject(T item)
+    {
+        _objects.Add(item);
+        Logger.Debug("Returned Vector to Pool");
+    }
+}
+    
     public class Pathfinder
     {
         //TODO Grab Z axis for each move from scene grid, if Z is desired. Walking works fine sending 0 Z axis.
@@ -73,17 +106,17 @@ namespace Mooege.Core.GS.AI
         private float _baseX = 0, _baseY = 0; // Used to convert local scene coordinates back to world coordinates. These are the scenes x/y normally.
         private Scene _curScene; // scene containing the start location
         private Scene _destScene; // scene containing destination
-        public Pathfinder()
-        {
-        }
+
+        
         public List<Vector3D> FindPath(Actor actor, Vector3D Start, Vector3D Destination)
         {
             _baseX = 0; _baseY = 0; // reset to 0
-
+            vectorPathList.Clear(); // Clear the previous path.
             // Should only be null first time a path is requested.
             if (_curScene == null)
             { 
                 _curScene = actor.CurrentScene;
+                if (_curScene == null) { Logger.Debug("Pathfinder requested an actors scene who has no scene"); return vectorPathList; }
                 if(!listOfPathFinderInstances.TryGetValue(_curScene.SceneSNO.Id,out mPathFinder)) // Attempts to pull the pathfinder which matches the scenes SNO from the patherlist
                 {
                     mPathFinder = new PathFinderFast(_curScene.NavMesh.WalkGrid); // Create a new pather, using the current scenes grid.
@@ -97,6 +130,7 @@ namespace Mooege.Core.GS.AI
             if (!_curScene.Bounds.IntersectsWith(new System.Windows.Rect(Start.X, Start.Y, 1, 1)))
             { 
                 _curScene = actor.CurrentScene;
+                if (_curScene == null) { Logger.Debug("Pathfinder requested an actors scene who has no scene"); return vectorPathList; }
                 if (!listOfPathFinderInstances.TryGetValue(_curScene.SceneSNO.Id, out mPathFinder))
                 {
                     mPathFinder = new PathFinderFast(_curScene.NavMesh.WalkGrid);
@@ -132,7 +166,6 @@ namespace Mooege.Core.GS.AI
             
             nodePathList = mPathFinder.FindPath(_startSceneLocal, _destinationSceneLocal); // The actual pathfind request, the path is found here.
             
-            vectorPathList.Clear(); // Clear the previous path.
 
             if (nodePathList == null) { return vectorPathList; }// No Path Found.
             if (nodePathList.Count < 1) { return vectorPathList; } // Safety net Incase start/dest are the same.
@@ -141,7 +174,9 @@ namespace Mooege.Core.GS.AI
             {
                 // Convert the path into world coordinates for use in Movement.
                 // TODO Objectpool maybe?
-                vectorPathList.Insert(0, new Vector3D(nodePathList[i].X * 2.5f + _baseX, nodePathList[i].Y * 2.5f + _baseY, 0));
+                var tempVec = actor.World.Game.Pathfinder.VectorPool.GetObject();
+                tempVec.Set(nodePathList[i].X * 2.5f + _baseX, nodePathList[i].Y * 2.5f + _baseY, 0);
+                vectorPathList.Insert(0, tempVec);
             }
             return vectorPathList;
         }
@@ -225,6 +260,8 @@ namespace Mooege.Core.GS.AI
                 }
             }
         }
+
+        
     }
 
     
@@ -245,14 +282,13 @@ namespace Mooege.Core.GS.AI
                 this._actor = actor;
                 this._start = Start;
                 this._destination = Destination;
-                this.Path = new List<Vector3D>();
+                //this.Path = new List<Vector3D>();
             }
-            public List<Vector3D> GetPath()
+            public void GetPath()
             {
-                Path.AddRange(_pathfinder.FindPath(_actor, _start, _destination));
-                PathFound = true;
-               
-                return Path;
+                Path = _pathfinder.FindPath(_actor, _start, _destination);
+                PathFound = true;             
+                return;
             }
         }
 
