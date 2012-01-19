@@ -151,6 +151,10 @@ namespace Mooege.Core.GS.Powers.Implementations
     {
         public override IEnumerable<TickTimer> Main()
         {
+           // Check to ensure targeted location is valid - DarkLotus
+           if (User.CurrentScene.NavMesh.WalkGrid[(int)((TargetPosition.X - this.World.QuadTree.Query<Mooege.Core.GS.Map.Scene>(TargetPosition).FirstOrDefault().Bounds.Left) / 2.5f), (int)((TargetPosition.Y - this.World.QuadTree.Query<Mooege.Core.GS.Map.Scene>(TargetPosition).FirstOrDefault().Bounds.Top) / 2.5f)] == 0)
+               yield break;
+            
             //there is a changed walking speed multiplier from 8101 patch.
             bool hitAnything = false;
             StartCooldown(EvalTag(PowerKeys.CooldownTime));

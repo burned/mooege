@@ -652,7 +652,17 @@ namespace Mooege.Core.GS.Players
             // here we should also be checking the position and see if it's valid. If not we should be resetting player to a good position with ACDWorldPositionMessage
             // so we can have a basic precaution for hacks & exploits /raist.
             if (message.Position != null)
-                this.Position = message.Position;
+            {
+                // Checks if new location is valid before moving. this might be a bad idea as these packets come in fast and quadtree is expensive time wise - DarkLotus
+                    if (this.CurrentScene.NavMesh.WalkGrid[(int)((this.Position.X - this.World.QuadTree.Query<Mooege.Core.GS.Map.Scene>(message.Position).FirstOrDefault().Bounds.Left) / 2.5f), (int)((this.Position.Y - this.World.QuadTree.Query<Mooege.Core.GS.Map.Scene>(message.Position).FirstOrDefault().Bounds.Top) / 2.5f)] == 0)
+                    {
+                        Logger.Info("Account: " + client.BnetClient.Account.Name + " Attempted to move to an unwalkable location");
+                        return;
+                    }
+
+                    this.Position = message.Position;
+            }
+                
 
             this.SetFacingRotation(message.Angle);
 

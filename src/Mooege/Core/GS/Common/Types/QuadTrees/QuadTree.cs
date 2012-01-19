@@ -520,6 +520,16 @@ namespace Mooege.Core.GS.Common.Types.QuadTrees
                 GetChildNodes(childNode, results);
             }
         }
+
+
+        public List<T> Query<T>(Math.Vector3D TargetPosition) where T : WorldObject
+        {
+            Rect bounds = new Rect(TargetPosition.X, TargetPosition.Y, 1f, 1f);
+            var results = new List<T>();
+            if (this.RootNode != null)
+                this.Query(bounds, RootNode, results);
+            return results;
+        }
     }
 
     /// <summary>
