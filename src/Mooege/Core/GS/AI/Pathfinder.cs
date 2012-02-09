@@ -134,7 +134,15 @@ namespace Mooege.Core.GS.AI
             
             vectorPathList.Clear(); // Clear the previous path.
 
-            if (nodePathList == null) { return vectorPathList; }// No Path Found.
+            if (nodePathList == null) {
+                //TODO: Sometimes Mobs are require to spawn outside current walkable boundaries, with the current implementation
+                //Pathfinder is unable to return a valid path if the mob is outside this boundaries.
+                //This is just a hackish way to force a path over the mob.
+                Logger.Debug("Pathfinding forced hack activated due Mob outside walkable area");
+                vectorPathList.Insert(0, new Vector3D(Destination.X,Destination.Y,Destination.Z));
+                return vectorPathList; 
+                
+            }// No Path Found.
             if (nodePathList.Count < 1) { return vectorPathList; } // Safety net Incase start/dest are the same.
            
             for (int i = 0; i < nodePathList.Count; i++)
@@ -268,7 +276,7 @@ namespace Mooege.Core.GS.AI
                 if (Path.Count < 4)
                     return Path;
                 Path.RemoveAt(0);
-                Logger.Debug("Path Length before cull " + Path.Count);
+                //Logger.Debug("Path Length before cull " + Path.Count);
                 for (int i = Path.Count - 1; i > 2; i--)
                 {
                 //if direction from square 1 to 2 is same as 2 to 3 remove 2
@@ -281,7 +289,7 @@ namespace Mooege.Core.GS.AI
                     }
                     
                 }
-                Logger.Debug("Path Length after cull " + Path.Count);
+                //Logger.Debug("Path Length after cull " + Path.Count);
                 return Path;
             }
 

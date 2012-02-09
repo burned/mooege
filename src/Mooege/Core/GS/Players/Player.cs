@@ -674,11 +674,20 @@ namespace Mooege.Core.GS.Players
             // so we can have a basic precaution for hacks & exploits /raist.
             if (message.Position != null)
             {
-                if (!client.Player.World.CheckLocationForFlag(message.Position,Mooege.Common.MPQ.FileFormats.Scene.NavCellFlags.AllowWalk))
+                if (!client.Player.World.CheckLocationForFlag(message.Position, Mooege.Common.MPQ.FileFormats.Scene.NavCellFlags.AllowWalk))
+                {
+                    Logger.Info("Account: " + client.BnetClient.Account.Name + " Attempted to move to an unwalkable location");
+                    return;
+                }
+                /*else
+                {
+                    var ActorsInRange = GetActorsInRange(3f);
+                    foreach (var actor in ActorsInRange)
                     {
-                        Logger.Info("Account: " + client.BnetClient.Account.Name + " Attempted to move to an unwalkable location");
-                        return;
+                        Logger.Debug(actor.ToString());
                     }
+                    Logger.Info("Current Position: {0}", this.Position);
+                }*/
                 this.Position = message.Position;
             }
                 
@@ -1677,18 +1686,23 @@ namespace Mooege.Core.GS.Players
             {
                 case ToonClass.Barbarian:
                     UsePrimaryResource(0.1f);
+                    AddPercentageHP(1); //Testing Purposes until All Healthglobes get fixed.
                     break;
                 case ToonClass.DemonHunter:
                     GeneratePrimaryResource(3f);
                     GenerateSecondaryResource(0.3f);
+                    AddPercentageHP(1); //Testing Purposes until All Healthglobes get fixed.
                     break;
                 case ToonClass.Monk:
+                    AddPercentageHP(1); //Testing Purposes until All Healthglobes get fixed.
                     break;
                 case ToonClass.WitchDoctor:
                     GeneratePrimaryResource(4f);
+                    AddPercentageHP(1); //Testing Purposes until All Healthglobes get fixed.
                     break;
                 case ToonClass.Wizard:
                     GeneratePrimaryResource(2f);
+                    AddPercentageHP(1); //Testing Purposes until All Healthglobes get fixed.
                     break;
             }
         }
