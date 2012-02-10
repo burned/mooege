@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2011 mooege project
+ * Copyright (C) 2011 - 2012 mooege project - http://www.mooege.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,6 @@ namespace Mooege.Common.MPQ
             this.LoadCatalog("CoreTOC.dat"); // as of patch beta patch 7841, blizz renamed TOC.dat as CoreTOC.dat
             this.LoadCatalog("TOC.dat", true, PatchExceptions.ToList()); // used for reading assets patched to zero bytes and removed from mainCatalog file.  
             this.LoadDBCatalog();
-
             Hacks.OnMPQLoaded();
         }
 
