@@ -36,7 +36,7 @@ namespace Mooege.Common.Versions
             /// <summary>
             /// Main assemblies version.
             /// </summary>
-            public const string Version = "1.10057.*";
+            public const string Version = "1.10485.*";
         }
 
         /// <summary>
@@ -47,11 +47,11 @@ namespace Mooege.Common.Versions
             /// <summary>
             /// Required client version.
             /// </summary>
-            public const int RequiredClientVersion = 10057;
+            public const int RequiredClientVersion = 10485;
 
             public static Dictionary<string, int> ClientVersionMaps = new Dictionary<string, int>
             {
-                {"Aurora ab0ebd5e2c_public", 10057},
+				{"Aurora ab0ebd5e2c_public", 10485}, // also 10057, 10235
                 {"Aurora 24e2d13e54_public", 9991},
                 {"Aurora 79fef7ae8e_public", 9950}, // also 9858
                 {"Aurora 8018401a9c_public", 9749},
@@ -117,7 +117,7 @@ namespace Mooege.Common.Versions
 
             public static class Resources
             {
-                public static string ProfanityFilterHash = "de1862793fdbabb6eb1edec6ad1c95dd99e2fd3fc6ca730ab95091d694318a24"; //9558-10057
+                public static string ProfanityFilterHash = "de1862793fdbabb6eb1edec6ad1c95dd99e2fd3fc6ca730ab95091d694318a24"; //9558-10485
                 public static string AvailableActs = "bd9e8fc323fe1dbc1ef2e0e95e46355953040488621933d0685feba5e1163a25"; //10057
                 public static string AvailableQuests = "9303df8f917e2db14ec20724c04ea5d2af4e4cb6c72606b67a262178b7e18104"; //10057
 
@@ -161,7 +161,7 @@ namespace Mooege.Common.Versions
             /// <summary>
             /// Required MPQ patch version.
             /// </summary>
-            public const int RequiredPatchVersion = 10057;
+            public const int RequiredPatchVersion = 10485;
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Mooege.Common.Versions
 
             //This is the server version sent in VersionsMessage
             public const string MajorVersion = "1.0.3";
-            public const string ServerBuild = "10182";
+            public const string ServerBuild = "10485";
             public const string VersionString = MajorVersion + "." + ServerBuild;
 
             // old version strings.
